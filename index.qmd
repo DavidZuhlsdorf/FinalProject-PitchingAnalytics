@@ -1,0 +1,36 @@
+---
+title: "index.qmd"
+author: "David Zuhlsdorf"
+format: html
+editor: visual
+---
+
+### How Much Do Missed Calls Matter? Umpire Accuracy and Potential Impact in the 2025 World Series
+
+##### Abstract:
+This project will look at umpire ball and strike call accuracy in the 2025 World Series using Statcast data from baseball savant. 
+
+
+
+```{r}
+# read in 2025 World Series data
+library(tidyverse)
+library(readxl)
+data<- read_excel(here::here("data/2025WS_data.xlsx"))
+
+```
+
+```{r}
+# Need to make the strike zone and establish what is a strike or ball
+clean_data <- data %>%
+  filter(des == c("Ball","Called Strike")) %>%
+  mutate(ump_call = if_else(des == "Called Strike","Strike","Ball"),
+         abs_call = if_else(plate_x >= -0.83 & plate_x <= 0.83 &
+                              plate_z >= sz_bot & plate_z <= sz_top,
+                            "Strike",
+                            "Ball"))
+```
+
+
+
+
