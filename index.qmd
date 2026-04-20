@@ -22,15 +22,58 @@ data<- read_excel(here::here("data/2025WS_data.xlsx"))
 
 ```{r}
 # Need to make the strike zone and establish what is a strike or ball
+data$plate_x <- as.numeric(data$plate_x)
+data$plate_z <- as.numeric(data$plate_z)
 clean_data <- data %>%
   filter(des == c("Ball","Called Strike")) %>%
   mutate(ump_call = if_else(des == "Called Strike","Strike","Ball"),
          abs_call = if_else(plate_x >= -0.83 & plate_x <= 0.83 &
                               plate_z >= sz_bot & plate_z <= sz_top,
                             "Strike",
-                            "Ball"))
+                            "Ball"),
+         correct_call = if_else(ump_call == abs_call,"Yes","No"),
+         z_norm = (plate_z - sz_bot) / (sz_top - sz_bot)
+         )
+
 ```
 
+```{r}
 
+ggplot(clean_data, aes(x = plate_x, y = z_norm, color = correct_call)) +
+  geom_point(position = "jitter") +
+geom_rect(
+    xmin = -0.83, xmax = 0.83,
+    ymin = 0, ymax = 1,
+    fill = NA, color = "black", linewidth = 1
+  ) +
+  theme_minimal() +
+  scale_color_viridis_d() +
+  labs(
+    title = "Correct and Incorrect Ball/Strike Calls",
+    x = "Horizontal pitch location (plate_x)",
+    y = "Normalized strike zone height",
+    color = "Correct Call"
+  ) 
+  
+```
+
+```{r}
+# overall accuracy bar chart 
+accuracy_data <- clean_data %>%
+  group_by(game_date) %>%
+  count(correct_call) %>%
+  mutate(game_date = as.character(game_date),
+    accuracy = (n / sum(n))*100) %>%
+  filter(correct_call == "Yes")
+
+ggplot(accuracy_data,aes(x = game_date, y = accuracy, fill = accuracy)) +
+  geom_col() +
+  theme_minimal() +
+  scale_fill_viridis_c() +
+  geom_hline(yintercept = 94.15,
+             linewidth = 1,
+             color = "black",
+             linetype = "dashed")
+```
 
 
