@@ -16,6 +16,7 @@ This project will look at umpire ball and strike call accuracy in the 2025 World
 # read in 2025 World Series data
 library(tidyverse)
 library(readxl)
+library(plotly)
 data<- read_excel(here::here("data/2025WS_data.xlsx"))
 
 ```
@@ -66,14 +67,41 @@ accuracy_data <- clean_data %>%
     accuracy = (n / sum(n))*100) %>%
   filter(correct_call == "Yes")
 
-ggplot(accuracy_data,aes(x = game_date, y = accuracy, fill = accuracy)) +
+barplot<- ggplot(accuracy_data,aes(x = game_date, y = accuracy, fill = accuracy, label = accuracy)) +
   geom_col() +
   theme_minimal() +
   scale_fill_viridis_c() +
-  geom_hline(yintercept = 94.15,
-             linewidth = 1,
-             color = "black",
-             linetype = "dashed")
+  geom_hline(aes(yintercept = 94.15,
+             linetype = "2025 Average Accuracy:94.15%")) +
+  labs(title = "Umpire Accuracy for Called Pitches in 2025 World Series")
+
+ggplotly(barplot,tooltip = "label")
+
 ```
 
+```{r}
+# Missed call density heatmap
+missed_calls <- clean_data %>%
+  filter(correct_call == "No")
+
+ggplot(missed_calls, aes(x = plate_x, y = z_norm)) +
+  stat_density_2d(
+    aes(fill = after_stat(density)),
+    geom = "raster",
+    contour = FALSE
+  ) +
+  geom_rect(
+    xmin = -0.83, xmax = 0.83,
+    ymin = 0, ymax = 1,
+    fill = NA, color = "white", linewidth = 1
+  ) +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  labs(
+    title = "Density of Missed Ball/Strike Calls in 2025 World Series",
+    x = "Horizontal Pitch Location",
+    y = "Normalized Strike Zone Height",
+    fill = "Density"
+  )
+```
 
