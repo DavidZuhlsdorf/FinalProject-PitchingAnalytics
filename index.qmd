@@ -26,7 +26,7 @@ data<- read_excel(here::here("data/2025WS_data.xlsx"))
 data$plate_x <- as.numeric(data$plate_x)
 data$plate_z <- as.numeric(data$plate_z)
 clean_data <- data %>%
-  filter(des == c("Ball","Called Strike")) %>%
+  filter(des %in% c("Ball","Called Strike")) %>%
   mutate(ump_call = if_else(des == "Called Strike","Strike","Ball"),
          abs_call = if_else(plate_x >= -0.83 & plate_x <= 0.83 &
                               plate_z >= sz_bot & plate_z <= sz_top,
@@ -81,7 +81,12 @@ barplot<- ggplot(accuracy_data,aes(x = game_date, y = accuracy, fill = accuracy,
   scale_fill_viridis_c() +
   geom_hline(aes(yintercept = 94.15,
              linetype = "2025 Average Accuracy:94.15%")) +
-  labs(title = "Umpire Accuracy for Called Pitches in 2025 World Series")
+  labs(
+    title = "Umpire Accuracy by World Series Game",
+    x = "Game Date",
+    y = "Accuracy (%)",
+    linetype = ""
+  )
 
 ggplotly(barplot,tooltip = "label")
 
@@ -114,17 +119,21 @@ ggplot(missed_calls, aes(x = plate_x, y = z_norm)) +
 ```
 
 ```{r}
-accuracy_data2 <- clean_data %>%
+accuracy_by_count <- clean_data %>%
   group_by(count) %>%
-  count(correct_call) %>%
-  mutate(accuracy = (n / sum(n))*100) %>%
-  filter(correct_call == "Yes") 
-accuracy_data2 %>%
-  mutate()
-
-ggplot(accuracy_data2, aes(x = count , y = accuracy)) +
-  geom_segment(aes(xend = count, y = 0, yend = accuracy), color = "blue") +
-  geom_point(color = "red") +
-  coord_flip()
+  summarise(
+    total_pitches = n(),
+    correct_calls = sum(correct_call == "Yes"),
+    accuracy = (correct_calls / total_pitches)*100
+  )
+ggplot(accuracy_by_count, aes(x = reorder(count, accuracy), y = accuracy)) +
+  geom_segment(aes(xend = count, y = 0, yend = accuracy), color = "steelblue") +
+  geom_point(color = "red", size = 3) +
+  coord_flip() +
+  labs(
+    title = "Umpire Accuracy by Count",
+    x = "Count",
+    y = "Accuracy (%)"
+  )
 ```
 
