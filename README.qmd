@@ -3,6 +3,7 @@ title: "Umpire Accuracy in the 2025 World Series"
 format: gfm
 editor: visual
 prefer-html: true
+embed-resources: true
 ---
 
 ```{r}
@@ -44,9 +45,8 @@ Key variables used in this analysis include:
 -   `sz_top` and `sz_bot`: batter-specific strike zone boundaries\
 -   `balls` and `strikes`: count\
 -   `inning`, `home_score`, and `away_score`: game situation\
--   `des`: umpire call description\
+-   `description`: umpire call description\
 -   `abs_call`,`ump_call`,`correct_call`: Created variables
-
 
 The data was filtered to only include taken pitches that were called either a ball or a called strike. I then created a simplified automated strike zone based on pitch location. A pitch was classified as a strike if it crossed within the horizontal strike zone and fell between the batter’s individual strike zone height.
 

@@ -3,14 +3,22 @@ title: "index.qmd"
 author: "David Zuhlsdorf"
 format: html
 editor: visual
+embed-resources: true
 ---
 
-### Is the new ABS system in the MLB useful? Umpire Accuracy and Potential Impact in the 2025 World Series
+# How accurate are MLB Umpires in the biggest moments? A look at umpire accuracy in the 2025 World Series.
 
-##### Abstract:
-This project will look at umpire ball and strike call accuracy in the 2025 World Series using Statcast data from baseball savant. 
+### Abstract:
 
+This project looks at MLB umpire accuracy on called balls and strikes during the 2025 World Series using Statcast data from Baseball Savant. I filtered the data to include only taken pitches that were called either a ball or called strike. I then compared each umpire call to an automated strike zone based on pitch location and the batter-specific strike zone height. My analysis looks at overall accuracy, game-by-game accuracy, missed-call location, accuracy by count, and differences between high-leverage and non-leverage situation. The results show that most missed calls occurred near the edges of the strike zone, especially around the corners. Overall, my analysis shows that World Series umpire accuracy was generally strong, but borderline pitches were the most common source of missed calls.
 
+### Introduction:
+
+Ball and strike calls are one of the most important and controversial parts of baseball. These decisions are made in real time by a human umpire, and even small errors can have a major impact on the outcome of an at-bat. Unlike referees, home-plate umpires have to make a large amount of calls every game. In the 2025 World Series alone, home-plate umpires had to make 1070 calls on just balls and strikes over just 7 games. This does not include calls at the plate, foul ball calls, or other calls in the field. In high-stakes situations like the World Series, a single missed call can influence pitch selection, shift momentum, and ultimately affect the result of a game.
+
+In todays game, we have advanced tracking systems like Statcast which make it possible to evaluate how accurate an umpire is. More specifically, there is a new Automated Ball and Strike system (ABS) that has been introduced to the MLB in 2026. This system has a perfect representation of the strike zone for any hitter that is up to bat and can track each pitch and determine whether it was a strike or ball. With this new system, hitters, catchers, and pitchers can challenge an umpire's call. Each team gets 2 challenges a game, but if the challenge is correct, they do not lose a challenge. Some critics believe that the system takes away from the game and is not needed, while others believe it makes the game a lot more fair.
+
+Since the 2025 World Series did not have ABS, I wanted to look at how accurate umpires were. This project focuses on the 2025 World Series and asks the question: How accurate are MLB umpires in the biggest moments? In particular, it looks at overall accuracy, whether umpire accuracy changes in high-pressure situations, where missed calls are most likely to occur within the strike zone, and whether the count has an impact on the accuracy. By analyzing Statcast pitch-level data from Baseball Savant, this analysis aims to better understand the consistency and reliability of umpire decison-making in the biggest moments. The variables I will be using are `plate_x` and `plate_z` (pitch location), `sz_top` and `sz_bot` (batter-specific strike zone boundaries), `balls` and `strikes` (count), `inning`, `home_score`, and `away_score` (game situation), `des` (umpire call description), and`abs_call`,`ump_call`,`correct_call` which are created variables.
 
 ```{r}
 # read in 2025 World Series data
@@ -39,32 +47,13 @@ clean_data <- data %>%
          full_count = ifelse(balls == 3 & strikes == 2, "Yes","No"),
          late_inning = ifelse(inning >= 7,"Yes","No"),
          run_diff = abs(home_score-away_score),
-         close_game = ifelse(run_diff <= 4, "Yes","No"),
+         close_game = ifelse(run_diff <= 3, "Yes","No"),
          high_lev = ifelse(late_inning =="Yes" & close_game == "Yes","High leverage situation","Not high leverage situation")
          )
 
 ```
 
-```{r}
-
-ggplot(clean_data, aes(x = plate_x, y = z_norm, color = correct_call)) +
-  geom_point(position = "jitter") +
-geom_rect(
-    xmin = -0.83, xmax = 0.83,
-    ymin = 0, ymax = 1,
-    fill = NA, color = "black", linewidth = 1
-  ) +
-  theme_minimal() +
-  scale_color_viridis_d() +
-  labs(
-    title = "Correct and Incorrect Ball/Strike Calls",
-    x = "Horizontal pitch location (plate_x)",
-    y = "Normalized strike zone height",
-    color = "Correct Call"
-  ) +
-  facet_wrap(~high_lev)
-  
-```
+### Figure 1. Overall accuracy by game
 
 ```{r}
 # overall accuracy bar chart 
@@ -92,6 +81,35 @@ ggplotly(barplot,tooltip = "label")
 
 ```
 
+The first visualization shows umpire accuracy for each World Series game, along with a reference line for the 2025 MLB average accuracy (94.15%). Accuracy remains relatively high across all games, generally hovering near the league average. We can see that the variation is visible specifically in game 2. Game 2 saw an overall accuracy of 85.7% which was well below the regular season average and series average. This drop suggests that umpire performance is generally stable but individual games can see drops in accuracy. Even a single game with lower accuracy can have a significant impact on the rest of the series. Overall, this graph shows that umpires are generally reliable but are not immune to drops in performances from game to game.
+
+### Figure 2. Pitch Location: Correct vs. Incorrect Calls
+
+```{r}
+
+ggplot(clean_data, aes(x = plate_x, y = z_norm, color = correct_call)) +
+  geom_point(position = "jitter") +
+geom_rect(
+    xmin = -0.83, xmax = 0.83,
+    ymin = 0, ymax = 1,
+    fill = NA, color = "black", linewidth = 1
+  ) +
+  theme_minimal() +
+  scale_color_viridis_d() +
+  labs(
+    title = "Correct and Incorrect Ball/Strike Calls",
+    x = "Horizontal pitch location (plate_x)",
+    y = "Normalized strike zone height",
+    color = "Correct Call"
+  ) +
+  facet_wrap(~high_lev)
+  
+```
+
+This scatterplot of pitch locations highlights where umpires made correct and incorrect calls, separated by high-leverage and non-high-leverage situations. High leverage being in the 7th inning or later and the run differential being 3 runs or fewer. We can see that most incorrect calls occur near the boundaries of the strike zone. Pitches clearly inside or outside of the zone are almost always called correctly. This suggests that umpires struggle with pitches on the edges of the strike zone. When comparing the leverage of the situation, the overall structure of the scatterplots look similiar. This suggests that mistakes made by the umpire are driven more by the location of the pitch rather than the pressure of the game.
+
+### Figure 3. Missed Call Density Heatmap
+
 ```{r}
 # Missed call density heatmap
 missed_calls <- clean_data %>%
@@ -118,6 +136,10 @@ ggplot(missed_calls, aes(x = plate_x, y = z_norm)) +
   )
 ```
 
+This heatmap of missed calls provides a more detailed view of where calls are missed. The highest density of missed calls appears to be in the bottom left of the strikezone. We can also see some concentration around the other corners of the zone. This is probably due to the fact that if a pitch is on the corner, than an umpires judgement on the vertical and horizontal position of the pitch are challenged. This suggests that umpire's missed calls are not random. Instead, they are clustered on the corners of the zone and around the edges, where the pitch is a borderline ball or strike. These are the hardest pitches to make a call on, even with professional experience.
+
+Figure 4. Accuracy by Count
+
 ```{r}
 accuracy_by_count <- clean_data %>%
   group_by(count) %>%
@@ -126,7 +148,8 @@ accuracy_by_count <- clean_data %>%
     correct_calls = sum(correct_call == "Yes"),
     accuracy = (correct_calls / total_pitches)*100
   )
-ggplot(accuracy_by_count, aes(x = reorder(count, accuracy), y = accuracy)) +
+count_plot <- ggplot(accuracy_by_count, aes(x = reorder(count, accuracy), y = accuracy,
+                              label = accuracy)) +
   geom_segment(aes(xend = count, y = 0, yend = accuracy), color = "steelblue") +
   geom_point(color = "red", size = 3) +
   coord_flip() +
@@ -135,5 +158,5 @@ ggplot(accuracy_by_count, aes(x = reorder(count, accuracy), y = accuracy)) +
     x = "Count",
     y = "Accuracy (%)"
   )
+ggplotly(count_plot, tooltip = "label")
 ```
-
