@@ -41,7 +41,7 @@ Key variables used in this analysis include:
 -   `sz_top` and `sz_bot`: batter-specific strike zone boundaries\
 -   `balls` and `strikes`: count\
 -   `inning`, `home_score`, and `away_score`: game situation\
--   `des`: umpire call description\
+-   `description`: umpire call description\
 -   `abs_call`,`ump_call`,`correct_call`: Created variables
 
 The data was filtered to only include taken pitches that were called either a ball or a called strike. I then created a simplified automated strike zone based on pitch location. A pitch was classified as a strike if it crossed within the horizontal strike zone and fell between the batter’s individual strike zone height.
@@ -117,11 +117,11 @@ Umpire accuracy across World Series games remains consistently high and close to
 
 ```{r}
 ggplot(clean_data, aes(x = plate_x, y = z_norm, color = correct_call)) +
-  geom_point(position = "jitter") +
+  geom_point(position = "jitter", alpha = 0.55) +
   geom_rect(
     xmin = -0.83, xmax = 0.83,
     ymin = 0, ymax = 1,
-    fill = NA, color = "black", linewidth = 1
+    fill = NA, color = "darkgrey", linewidth = 1
   ) +
   theme_minimal() +
   scale_color_viridis_d() +

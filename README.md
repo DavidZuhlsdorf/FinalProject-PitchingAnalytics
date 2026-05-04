@@ -1,4 +1,5 @@
-# Untitled
+# Umpire Accuracy in the Biggest Moments: Looking at the 2025 World
+Series
 
 
 ``` r
@@ -74,7 +75,7 @@ Key variables used in this analysis include:
 - `sz_top` and `sz_bot`: batter-specific strike zone boundaries  
 - `balls` and `strikes`: count  
 - `inning`, `home_score`, and `away_score`: game situation  
-- `des`: umpire call description  
+- `description`: umpire call description  
 - `abs_call`,`ump_call`,`correct_call`: Created variables
 
 The data was filtered to only include taken pitches that were called
@@ -162,11 +163,11 @@ similar to the regular-season average, but sometimes can see a drop.
 
 ``` r
 ggplot(clean_data, aes(x = plate_x, y = z_norm, color = correct_call)) +
-  geom_point(position = "jitter") +
+  geom_point(position = "jitter", alpha = 0.55) +
   geom_rect(
     xmin = -0.83, xmax = 0.83,
     ymin = 0, ymax = 1,
-    fill = NA, color = "black", linewidth = 1
+    fill = NA, color = "darkgrey", linewidth = 1
   ) +
   theme_minimal() +
   scale_color_viridis_d() +
