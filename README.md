@@ -1,5 +1,4 @@
-# Umpire Accuracy in the Biggest Moments: Looking at the 2025 World
-Series
+# Umpire Accuracy in the 2025 World Series
 
 
 ``` r
