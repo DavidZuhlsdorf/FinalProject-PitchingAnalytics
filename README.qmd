@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Umpire Accuracy in the Biggest Moments: Looking at the 2025 World Series"
 format: gfm
 editor: visual
 ---
@@ -92,7 +92,7 @@ accuracy_data <- clean_data %>%
   ) %>%
   filter(correct_call == "Yes")
 
-barplot <- ggplot(
+ggplot(
   accuracy_data,
   aes(x = game_date, y = accuracy, fill = accuracy, label = round(accuracy, 2))
 ) +
@@ -109,7 +109,6 @@ barplot <- ggplot(
     linetype = ""
   )
 
-ggplotly(barplot, tooltip = "label")
 ```
 
 Umpire accuracy across World Series games remains consistently high and close to the MLB average of 94.15%. We can see that game 2 had a significant drop in accuracy, but the other 6 games were relatively consistent. This suggests that World Series umpires perform at a level similar to the regular-season average, but sometimes can see a drop.
@@ -177,7 +176,7 @@ accuracy_by_count <- clean_data %>%
     correct_calls = sum(correct_call == "Yes"),
     accuracy = (correct_calls / total_pitches)*100
   )
-count_plot <- ggplot(accuracy_by_count, aes(x = reorder(count, accuracy), y = accuracy, label = accuracy)) +
+ggplot(accuracy_by_count, aes(x = reorder(count, accuracy), y = accuracy, label = accuracy)) +
   geom_segment(aes(xend = count, y = 0, yend = accuracy), color = "steelblue") +
   geom_point(color = "red", size = 3) +
   coord_flip() +
@@ -188,7 +187,7 @@ count_plot <- ggplot(accuracy_by_count, aes(x = reorder(count, accuracy), y = ac
     y = "Accuracy (%)"
   ) 
 
-ggplotly(count_plot, tooltip = "label")
+
 ```
 
 Accuracy remains relatively consistent across pitch counts, but we do see a drop when the count is "hitter-friendly". This could suggest umpires expand the zone slightly when the count is in favor of the hitter. An observation worth noting is the accuracy on 2 strike counts. The accuracy is very high in 2 strike counts, suggesting that umpires are more focused and less likely to make an error when the batter is on the verge of striking out.
